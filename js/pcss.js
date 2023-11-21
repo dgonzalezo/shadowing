@@ -1,4 +1,3 @@
-// import './styles.css';
 import * as THREE from 'three';
 import Stats from 'three/addons/libs/stats.module.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
@@ -35,7 +34,7 @@ function init() {
   scene.add(camera);
 
   // lights
-  scene.add(new THREE.AmbientLight(0xffffff, 0.2));
+  scene.add(new THREE.AmbientLight(0xffffff, 2));
   light = new THREE.DirectionalLight(0xffffff, 1.4);
   light.position.set(4, 7, 4);
 
@@ -55,7 +54,7 @@ function init() {
     opacity: 1.0
   });
   const ground = new THREE.Mesh(
-    new THREE.PlaneBufferGeometry(10, 10, 1, 1),
+    new THREE.PlaneGeometry(10, 10, 1, 1),
     groundMaterial
   );
   ground.rotation.x = -Math.PI / 2;
@@ -70,8 +69,6 @@ function init() {
     PCSSGetShadow + '#if defined( SHADOWMAP_TYPE_PCF )'
   );
   THREE.ShaderChunk.shadowmap_pars_fragment = shader;
-  // console.log('PCSS shader', shader);
-  console.log('PCSSGetShadow', THREE.ShaderChunk.shadowmap_pars_vertex);
 
   // renderer
   renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -93,10 +90,43 @@ function init() {
   controls.target.set(0, 0, 0);
   controls.update();
 
-  loadGLTFModel(scene, 'models/dog.glb').then(dog => {
+  loadGLTFModel(scene, 'models/model1.glb').then(dog => {
     light.target = dog;
   });
 
+  // loadGLTFModel(scene, 'models/model1.glb', {
+  //   receiveShadow: true,
+  //   castShadow: true,
+  //   x: 0,
+  //   y: 1.5
+  // }).then(dog1 => {
+  //   // light.target = dog1;
+  // });
+  // loadGLTFModel(scene, 'models/model1.glb', {
+  //   receiveShadow: true,
+  //   castShadow: true,
+  //   x: 0,
+  //   y: -1.5
+  // }).then(dog1 => {
+  //   // light.target = dog1;
+  // });
+
+  // loadGLTFModel(scene, 'models/model1.glb', {
+  //   receiveShadow: true,
+  //   castShadow: true,
+  //   x: 0,
+  //   y: 1.5*2
+  // }).then(dog1 => {
+  //   // light.target = dog1;
+  // });
+  // loadGLTFModel(scene, 'models/model1.glb', {
+  //   receiveShadow: true,
+  //   castShadow: true,
+  //   x: 0,
+  //   y: -1.5*2
+  // }).then(dog1 => {
+  //   // light.target = dog1;
+  // });
   // performance monitor
   stats = Stats();
   container.appendChild(stats.dom);
@@ -114,9 +144,11 @@ function init() {
     frame += 0.001;
     const r = 4;
     light.position.set(
-      r * Math.sin(frame * Math.PI),
+      // r * Math.sin(frame * Math.PI),
       4,
-      r * Math.cos(frame * Math.PI)
+      4,
+      4
+      // r * Math.cos(frame * Math.PI)
     );
 
     renderer.render(scene, camera);

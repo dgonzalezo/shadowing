@@ -1,7 +1,6 @@
 import * as THREE from 'three';
-import { OBJLoader2 } from 'three/addons/loaders/OBJLoader2.js'
+import { OBJLoader } from 'three/addons/loaders/OBJLoader.js'
 import { MTLLoader } from 'three/addons/loaders/MTLLoader.js'
-import { MtlObjBridge } from 'three/addons/loaders/obj2/bridge/MtlObjBridge.js'
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader'
 
 export function loadObjModel(
@@ -13,14 +12,14 @@ export function loadObjModel(
   const { smooth, receiveShadow, castShadow } = options;
   return new Promise(resolve => {
     const mtlLoader = new MTLLoader()
-    mtlLoader.load(mtlPath, mtlParseResult => {
-      const materials = MtlObjBridge.addMaterialsFromMtlLoader(mtlParseResult)
-      const objLoader = new OBJLoader2()
-      objLoader.addMaterials(materials, true)
+    mtlLoader.load(mtlPath, (materials) => {
+      materials.preload();
+      const objLoader = new OBJLoader()
+      objLoader.setMaterials(materials)
       objLoader.load(objPath, obj => {
         console.log(`${objPath}:`, obj)
         obj.position.y = 0
-        obj.position.x = 3.5
+        obj.position.x = 0
         obj.receiveShadow = receiveShadow
         obj.castShadow = castShadow
         scene.add(obj)
@@ -33,15 +32,9 @@ export function loadObjModel(
             console.log('child.geometry:', child.geometry)
 
             if (smooth && child.geometry instanceof THREE.BufferGeometry) {
-              // smooth shading
-              const tempGeometry = new THREE.Geometry().fromBufferGeometry(
-                child.geometry
-              )
-              tempGeometry.mergeVertices()
-              tempGeometry.computeVertexNormals()
-              child.geometry = new THREE.BufferGeometry().fromGeometry(
-                tempGeometry
-              )
+              child.geometry.deleteAttribute('normal');
+              child.geometry = mergeVertices(child.geometry);
+              child.geometry.computeVertexNormals(child.geometry);
             }
           }
         })
@@ -55,30 +48,31 @@ export function loadObjModel(
 export function loadGLTFModel(
   scene,
   glbPath,
-  options = { receiveShadow: true, castShadow: true }
+  options = { receiveShadow: true, castShadow: true, x: 0, y: 0 }
 ) {
-  const { receiveShadow, castShadow } = options;
+  const { receiveShadow, castShadow, x, y } = options;
   return new Promise((resolve, reject) => {
     const loader = new GLTFLoader();
 
     loader.load(
       glbPath,
       gltf => {
-        console.log('gltf:', gltf);
+        // console.log('gltf:', gltf);
         const obj = gltf.scene;
         obj.name = 'dog';
-        obj.position.y = 0;
-        obj.position.x = 0;
+        obj.position.y = x;
+        obj.position.x = y;
         obj.receiveShadow = receiveShadow;
         obj.castShadow = castShadow;
         scene.add(obj);
 
-        console.log('model:', obj);
+        // console.log('model:', obj);
 
         obj.traverse(function(child) {
           if (child.isMesh) {
             child.castShadow = castShadow;
             child.receiveShadow = receiveShadow;
+            child.material.transparent = true;
           }
         });
         resolve(obj);

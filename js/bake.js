@@ -30,10 +30,11 @@ function init() {
 
   scene = new THREE.Scene();
 
-  const ambientLight = new THREE.AmbientLight(0xcccccc, 1);
+  const ambientLight = new THREE.AmbientLight(0xffffff, 1.5);
   scene.add(ambientLight);
 
   renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.setSize(window.innerWidth, window.innerHeight);
   renderer.outputEncoding = THREE.sRGBEncoding;
@@ -48,10 +49,36 @@ function init() {
   controls = new OrbitControls(camera, renderer.domElement);
 
   // loadGLTFModel function might need to be imported or defined here
-  loadGLTFModel(scene, 'models/dog-baked.glb', {
+  loadGLTFModel(scene, 'models/model1-baked.glb', {
     receiveShadow: false,
-    castShadow: false
+    castShadow: false,
+    x: 0,
+    y: 0 
   });
+  // loadGLTFModel(scene, 'models/model1-baked.glb', {
+  //   receiveShadow: false,
+  //   castShadow: false,
+  //   x: 0,
+  //   y: 2.5
+  // });
+  // loadGLTFModel(scene, 'models/model1-baked.glb', {
+  //   receiveShadow: false,
+  //   castShadow: false,
+  //   x: 0,
+  //   y: -2.5
+  // });
+  // loadGLTFModel(scene, 'models/model1-baked.glb', {
+  //   receiveShadow: false,
+  //   castShadow: false,
+  //   x: 0,
+  //   y: 2.5*2
+  // });
+  // loadGLTFModel(scene, 'models/model1-baked.glb', {
+  //   receiveShadow: false,
+  //   castShadow: false,
+  //   x: 0,
+  //   y: -2.5*2
+  // });
 }
 
 function animate() {

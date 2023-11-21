@@ -1,6 +1,9 @@
 import * as THREE from 'three';
 import Stats from 'three/addons/libs/stats.module.js';
+import { MTLLoader } from 'three/addons/loaders/MTLLoader.js'
+import { OBJLoader } from 'three/addons/loaders/OBJLoader.js'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js'
 import { loadObjModel } from './model.js';
 
 let camera;
@@ -22,7 +25,7 @@ function init() {
   camera.position.x = 20 * Math.sin(0.2 * Math.PI)
   camera.position.z = 20 * Math.cos(0.2 * Math.PI)
   camera.lookAt(new THREE.Vector3(0, 0, 0))
-  console.log('camera:', camera)
+  // console.log('camera:', camera)
 
   scene = new THREE.Scene()
 
@@ -34,9 +37,8 @@ function init() {
   plane.rotation.x = -Math.PI / 2
   plane.receiveShadow = true
   scene.add(plane)
-
-  const light = new THREE.DirectionalLight(0xdfebff, 1.0)
-  light.position.set(300 * 1.5, 400 * 1.5, 500 * 1.5)
+  
+  const light = new THREE.DirectionalLight(0xdfebff, 5)
   light.position.set(10, 30, 10)
   light.castShadow = true
   const d = 5
@@ -68,7 +70,39 @@ function init() {
 
   controls = new OrbitControls(camera, renderer.domElement)
 
-  loadObjModel(scene, 'models/dog.mtl', 'models/dog.obj')
+  // loadObjModel(scene, 'models/model1.mtl', 'models/model1.obj')
+
+  const mtlLoader = new MTLLoader()
+  mtlLoader.load('models/model1.mtl', (materials) => {
+    materials.preload();
+    const objLoader = new OBJLoader()
+    objLoader.setMaterials(materials)
+    objLoader.load('models/model1.obj', obj => {
+      // console.log(`${objPath}:`, obj)
+      obj.position.y = 0
+      obj.position.x = 0
+      obj.receiveShadow = true
+      obj.castShadow = true
+      scene.add(obj)
+
+      obj.traverse(function (child) {
+        if (child.isMesh) {
+          // console.log('mesh child:', child)
+          child.castShadow = true;
+          child.receiveShadow = true;
+          const smooth = false;
+          // console.log('child.geometry:', child.geometry)
+
+          if (smooth && child.geometry instanceof THREE.BufferGeometry) {
+            child.geometry.deleteAttribute('normal');
+            child.geometry = BufferGeometryUtils.mergeVertices(child.geometry);
+            child.geometry.computeVertexNormals(child.geometry);
+          }
+        }
+      })
+    })
+  })
+
 }
 
 function animate() {
